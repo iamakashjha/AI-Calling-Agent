@@ -1,0 +1,123 @@
+{
+  "type": "Settings",
+  "audio": {
+    "input": {
+      "encoding": "mulaw",
+      "sample_rate": 8000
+    },
+    "output": {
+      "encoding": "mulaw",
+      "sample_rate": 8000,
+      "container": "none"
+    }
+  },
+  "agent": {
+    "language": "en",
+    "listen": {
+      "provider": {
+        "type": "deepgram",
+        "model": "nova-3",
+        "keyterms": ["overdraft", "loan", "salary", "limit", "flexi", "interest"]
+      }
+    },
+    "think": {
+      "provider": {
+        "type": "open_ai",
+        "model": "gpt-4o-mini",
+        "temperature": 0.7
+      },
+      "prompt": "You are a professional telecalling AI agent working for a financial backup company that offers a Flexi Overdraft Facility for salaried individuals. Your role is to handle outbound customer calls and guide them through the entire eligibility and onboarding process. \n\n1. Greet the customer by name and confirm their identity. \n2. Introduce yourself and the purpose of the call (Flexi Overdraft Facility). \n3. Inform them that the call is being recorded for training and quality assurance. \n4. Ask about employment status and gather details like salary, PAN, DOB, city, pincode, and job designation. \n5. Explain the overdraft benefits clearly. \n6. Ask permission to send an eligibility link and check if they have ongoing loans or credit cards. \n7. Handle objections politely using rebuttals. \n8. Close the call respectfully and forward the case if eligible.",
+      "functions": [
+        {
+          "name": "open_call",
+          "description": "Initiates a new call with the customer and registers the call interaction.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_name": {
+                "type": "string",
+                "description": "Full name of the customer to greet and start the call with."
+              }
+            },
+            "required": ["customer_name"]
+          }
+        },
+        {
+          "name": "collect_customer_info",
+          "description": "Collects the customer's employment, salary, and personal details needed for eligibility check.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "call_id": {
+                "type": "integer",
+                "description": "The call ID for the current interaction."
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "employment_status": { "type": "string" },
+                  "net_salary": { "type": "number" },
+                  "company": { "type": "string" },
+                  "pan": { "type": "string" },
+                  "dob": { "type": "string" },
+                  "city": { "type": "string" },
+                  "pincode": { "type": "string" },
+                  "designation": { "type": "string" }
+                },
+                "required": ["employment_status", "net_salary", "company", "pan", "dob", "city", "pincode", "designation"]
+              }
+            },
+            "required": ["call_id", "info"]
+          }
+        },
+        {
+          "name": "check_eligibility",
+          "description": "Checks if the customer is eligible for the overdraft based on salary and basic info.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "call_id": {
+                "type": "integer",
+                "description": "Call ID for the current session to evaluate eligibility."
+              }
+            },
+            "required": ["call_id"]
+          }
+        },
+        {
+          "name": "explain_benefits",
+          "description": "Explains the Flexi Overdraft Facility benefits, such as interest rate, repayment terms, and flexibility.",
+          "parameters": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        {
+          "name": "close_call",
+          "description": "Closes the customer interaction by recording the outcome of the call.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "call_id": {
+                "type": "integer",
+                "description": "ID of the call being closed."
+              },
+              "outcome": {
+                "type": "string",
+                "description": "Final decision or note from the call (e.g., 'Forwarded to bank', 'Not eligible')."
+              }
+            },
+            "required": ["call_id", "outcome"]
+          }
+        }
+      ]
+    },
+    "speak": {
+      "provider": {
+        "type": "deepgram",
+        "model": "aura-2-thalia-en"
+      }
+    },
+    "greeting": "Hello! I'm calling from your financial support partner to help you explore our Flexi Overdraft Facility. This is a flexible financial backup that lets you borrow without EMIs — you only pay interest on the amount you use. Let’s check if you qualify today."
+  }
+}
